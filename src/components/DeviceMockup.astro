@@ -1,0 +1,524 @@
+---
+interface Props {
+  type: "web" | "mobile";
+  images: string[];
+  projectName: string;
+}
+
+const { type, images, projectName } = Astro.props;
+const isWeb = type === "web";
+const uniqueId = projectName.replace(/\s+/g, '-').toLowerCase();
+---
+
+<!-- Clean Device Thumbnail with Click Hint -->
+<div class="device-thumb" data-modal-trigger={uniqueId}>
+  {isWeb ? (
+    <div class="laptop">
+      <div class="laptop-screen">
+        <img src={images[0]} alt={projectName} loading="lazy" />
+      </div>
+      <div class="laptop-base"></div>
+    </div>
+  ) : (
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <img src={images[0]} alt={projectName} loading="lazy" />
+    </div>
+  )}
+  <!-- Click hint tooltip -->
+  <div class="click-hint">
+    <span class="hint-icon">👆</span>
+    <span class="hint-text">Click to view</span>
+  </div>
+</div>
+
+<!-- Modal with Advanced Motion -->
+<div class="modal" id={`modal-${uniqueId}`} data-modal>
+  <div class="modal-bg" data-modal-close></div>
+  
+  <div class="modal-wrapper">
+    <button class="close-btn" data-modal-close aria-label="Close">✕</button>
+    
+    <div class={`device-container ${isWeb ? 'is-laptop' : 'is-phone'}`}>
+      {isWeb ? (
+        <div class="laptop-full">
+          <div class="laptop-screen-full">
+            <div class="slides" data-slides>
+              {images.map((img, i) => (
+                <div class={`slide ${i === 0 ? 'active' : ''}`} data-slide={i}>
+                  <img src={img} alt={`${projectName} ${i + 1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div class="laptop-base-full"></div>
+        </div>
+      ) : (
+        <div class="phone-full">
+          <div class="phone-notch-full"></div>
+          <div class="slides" data-slides>
+            {images.map((img, i) => (
+              <div class={`slide ${i === 0 ? 'active' : ''}`} data-slide={i}>
+                <img src={img} alt={`${projectName} ${i + 1}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {images.length > 1 && (
+      <div class="nav">
+        <button class="nav-arrow" data-prev>‹</button>
+        <div class="dots">
+          {images.map((_, i) => (
+            <button class={`dot ${i === 0 ? 'active' : ''}`} data-dot={i}></button>
+          ))}
+        </div>
+        <button class="nav-arrow" data-next>›</button>
+      </div>
+    )}
+    
+    <p class="swipe-hint">Swipe or use arrow keys</p>
+  </div>
+</div>
+
+<style>
+  /* Thumbnail */
+  .device-thumb {
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    position: relative;
+  }
+  .device-thumb:hover { transform: scale(1.05); }
+
+  /* Click Hint Tooltip */
+  .click-hint {
+    position: absolute;
+    bottom: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #1d4ed8;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4);
+  }
+  .click-hint::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid #1d4ed8;
+  }
+  .hint-icon {
+    animation: bounce 1.5s ease infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  /* Show on hover OR when auto-show class is added */
+  .device-thumb:hover .click-hint,
+  .click-hint.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  .laptop {
+    width: 120px;
+  }
+  .laptop-screen {
+    background: #222;
+    border-radius: 6px 6px 0 0;
+    padding: 4px;
+    border: 2px solid #333;
+  }
+  .laptop-screen img {
+    width: 100%;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 3px;
+    display: block;
+  }
+  .laptop-base {
+    height: 6px;
+    background: linear-gradient(#ccc, #aaa);
+    border-radius: 0 0 2px 2px;
+  }
+
+  .phone {
+    width: 60px;
+    background: #222;
+    border-radius: 10px;
+    padding: 4px;
+    border: 2px solid #333;
+    position: relative;
+  }
+  .phone-notch {
+    width: 24px;
+    height: 8px;
+    background: #111;
+    border-radius: 6px;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+  .phone img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    place-items: center;
+    padding: 20px;
+  }
+  .modal.active { display: grid; }
+
+  .modal-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-wrapper {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    animation: zoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .close-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .close-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: rotate(90deg);
+  }
+
+  /* Full Devices */
+  .laptop-full {
+    width: min(90vw, 680px);
+  }
+  .laptop-screen-full {
+    background: #1a1a1a;
+    border-radius: 12px 12px 0 0;
+    padding: 8px;
+    border: 3px solid #333;
+  }
+  .laptop-base-full {
+    height: 12px;
+    background: linear-gradient(#d0d0d0, #a0a0a0);
+    border-radius: 0 0 4px 4px;
+  }
+
+  .phone-full {
+    width: min(55vw, 280px);
+    background: #1a1a1a;
+    border-radius: 36px;
+    padding: 10px;
+    border: 3px solid #333;
+    position: relative;
+  }
+  .phone-notch-full {
+    width: 80px;
+    height: 24px;
+    background: #000;
+    border-radius: 16px;
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+
+  /* Slides with swipe */
+  .slides {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    touch-action: pan-y;
+  }
+  .is-laptop .slides { aspect-ratio: 16/10; }
+  .is-phone .slides { 
+    aspect-ratio: 9/19.5; 
+    border-radius: 26px;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    will-change: opacity, transform;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .nav-arrow {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .nav-arrow:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+  }
+  .nav-arrow:active {
+    transform: scale(0.95);
+  }
+
+  .dots {
+    display: flex;
+    gap: 8px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .dot.active {
+    background: #fff;
+    transform: scale(1.4);
+  }
+
+  .swipe-hint {
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .laptop { width: 100px; }
+    .laptop-screen img { height: 55px; }
+    .phone { width: 50px; }
+    .phone img { height: 90px; }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Auto-show tooltip when device comes into view
+    const deviceThumbs = document.querySelectorAll('.device-thumb');
+    const shownHints = new Set();
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !shownHints.has(entry.target)) {
+          shownHints.add(entry.target);
+          const hint = entry.target.querySelector('.click-hint');
+          if (hint) {
+            // Show after 2 seconds
+            setTimeout(() => {
+              hint.classList.add('show');
+              // Hide after 3 more seconds
+              setTimeout(() => {
+                hint.classList.remove('show');
+              }, 3000);
+            }, 2000);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    deviceThumbs.forEach(thumb => observer.observe(thumb));
+
+    // Open modal
+    document.querySelectorAll('[data-modal-trigger]').forEach(trigger => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = trigger.getAttribute('data-modal-trigger');
+        const modal = document.getElementById(`modal-${id}`);
+        modal?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    // Close modal
+    document.querySelectorAll('[data-modal-close]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (e.target === btn) {
+          btn.closest('[data-modal]')?.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.active').forEach(m => {
+          m.classList.remove('active');
+          document.body.style.overflow = '';
+        });
+      }
+    });
+
+    // Carousel with swipe & keyboard
+    document.querySelectorAll('[data-modal]').forEach(modal => {
+      const slidesContainer = modal.querySelector('[data-slides]');
+      if (!slidesContainer) return;
+
+      const slides = modal.querySelectorAll('.slide');
+      const dots = modal.querySelectorAll('.dot');
+      const prev = modal.querySelector('[data-prev]');
+      const next = modal.querySelector('[data-next]');
+
+      if (slides.length <= 1) return;
+
+      let current = 0;
+      let startX = 0;
+      let isDragging = false;
+
+      const show = (index: number, direction = 1) => {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+
+        slides.forEach((s, i) => {
+          s.classList.remove('active', 'prev');
+          if (i === current) s.classList.add('prev');
+          if (i === index) s.classList.add('active');
+        });
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        current = index;
+      };
+
+      prev?.addEventListener('click', () => show(current - 1, -1));
+      next?.addEventListener('click', () => show(current + 1, 1));
+      dots.forEach((d, i) => d.addEventListener('click', () => show(i)));
+
+      // Keyboard arrows
+      modal.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'ArrowLeft') show(current - 1, -1);
+        if (e.key === 'ArrowRight') show(current + 1, 1);
+      });
+
+      // Swipe gestures
+      slidesContainer.addEventListener('touchstart', (e: TouchEvent) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+      }, { passive: true });
+
+      slidesContainer.addEventListener('touchmove', (e: TouchEvent) => {
+        if (!isDragging) return;
+      }, { passive: true });
+
+      slidesContainer.addEventListener('touchend', (e: TouchEvent) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const endX = e.changedTouches[0].clientX;
+        const diff = startX - endX;
+        if (Math.abs(diff) > 50) {
+          diff > 0 ? show(current + 1, 1) : show(current - 1, -1);
+        }
+      });
+
+      // Mouse drag
+      slidesContainer.addEventListener('mousedown', (e: MouseEvent) => {
+        startX = e.clientX;
+        isDragging = true;
+        slidesContainer.style.cursor = 'grabbing';
+      });
+
+      document.addEventListener('mouseup', (e: MouseEvent) => {
+        if (!isDragging) return;
+        isDragging = false;
+        slidesContainer.style.cursor = '';
+        const diff = startX - e.clientX;
+        if (Math.abs(diff) > 50) {
+          diff > 0 ? show(current + 1, 1) : show(current - 1, -1);
+        }
+      });
+
+      // Auto-play when modal is open
+      let timer: number;
+      const observe = new MutationObserver(() => {
+        if (modal.classList.contains('active')) {
+          timer = setInterval(() => show(current + 1, 1), 4500);
+          modal.setAttribute('tabindex', '0');
+          modal.focus();
+        } else {
+          clearInterval(timer);
+        }
+      });
+      observe.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    });
+  });
+</script>
