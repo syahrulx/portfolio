@@ -33,7 +33,7 @@ export const siteConfig = {
     {
       name: "UiTMToGo+",
       type: "mobile",
-      images: ["/uitmtogo1.png", "/uitmtogo2.png", "/uitmtogo3.png", "/uitmtogo4.png", "/uitmtogo5.png"],
+      images: ["/uitmtogo1.png", "/uitmtogo3.png", "/uitmtogo4.png", "/uitmtogo5.png"],
       description:
         "A comprehensive mobile platform for UiTM students featuring food delivery services and a student marketplace. Enables students to order food, buy and sell items, with real-time tracking, payment integration, and delivery management.",
       link: "https://github.com/syahrulx",
