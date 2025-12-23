@@ -8,9 +8,10 @@ interface Props {
 const { type, images, projectName } = Astro.props;
 const isWeb = type === "web";
 const uniqueId = projectName.replace(/\s+/g, '-').toLowerCase();
-const base = import.meta.env.BASE_URL || '';
-// Prefix images with base URL
-const prefixedImages = images.map(img => `${base}${img.startsWith('/') ? img.slice(1) : img}`);
+const base = import.meta.env.BASE_URL || '/';
+// Ensure base ends with slash and prefix images
+const baseWithSlash = base.endsWith('/') ? base : `${base}/`;
+const prefixedImages = images.map(img => `${baseWithSlash}${img.startsWith('/') ? img.slice(1) : img}`);
 ---
 
 <!-- Clean Device Thumbnail with Click Hint -->
